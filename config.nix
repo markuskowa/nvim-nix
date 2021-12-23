@@ -14,7 +14,6 @@ in
         };
       };
     }
-    #./devicons.nix
   ];
 
   configs = {
