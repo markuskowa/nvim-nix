@@ -37,6 +37,8 @@ in
         hlsearch = true;
         incsearch = true;
         compatible = false;
+        expandtab = true;
+        tabstop = 2;
         sw = 2;
         cindent = true;
         backspace = "indent,eol,start";
@@ -168,6 +170,7 @@ in
               bash.bashls.pkg = pkgs.nodePackages.bash-language-server;
               nix.rnix.pkg = pkgs.rnix-lsp;
               cpp.clangd.pkg = pkgs.clang-tools;
+              python.pyright.pkg = pkgs.nodePackages.pyright;
             };
           in
           builtins.foldl'
