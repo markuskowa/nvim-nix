@@ -112,7 +112,7 @@ in
           lualine_y = [ "progress" ];
           lualine_z = [ "location" ];
         };
-        options = { theme = "gruvbox_dark"; };
+        options = { theme = "powerline"; };
       };
     };
     cmp = {
@@ -139,6 +139,9 @@ in
           { name = "spell"; keyword_length = 4; }
         ];
       };
+      keymaps = map silent_noremap [
+        [ "n" "<CR>" "<cmd>lua cmp.mapping.confirm({ select = true })<CR>" { } ]
+      ];
     };
     lightspeed = {
       plugins = with pkgs.vimPlugins; [ lightspeed-nvim ];
@@ -200,7 +203,7 @@ in
     colorscheme-and-more = {
       after = [ "global" "toggleterm" ];
       plugins = with pkgs.vimPlugins; [
-        gruvbox-nvim
+#        powerline
         lush-nvim
       ];
       vim = [
@@ -208,7 +211,7 @@ in
           autocmd FileType c,cpp  set formatoptions=croql cindent comments=sr:/*,mb:*,ex:*/,://
           autocmd BufWritePre * %s/\s\+$//e
         ''
-        "colorscheme gruvbox"
+#        "colorscheme powerline"
       ];
     };
   };
