@@ -2,37 +2,61 @@
   description = "Nvim";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
-    nix2nvimrc.url = "github:ck3d/nix2nvimrc";
-    utils.url = "github:numtide/flake-utils";
+    ck3d-configs.url = "github:ck3d/ck3d-nvim-configs";
   };
 
-  outputs = { self, nixpkgs, utils, nix2nvimrc }:
-    utils.lib.eachDefaultSystem (system:
-      let
-        nixpkgs' = import nixpkgs { inherit system; };
-        adminLanguages = [ "nix" "yaml" "bash" "markdown" "json" "toml" ];
-        nvim = with nixpkgs'; name: languages: runCommandLocal
-          "nvim"
-          { nativeBuildInputs = [ makeWrapper ]; }
-          ''
-            makeWrapper ${neovim-unwrapped}/bin/nvim $out/bin/nvim \
-              --add-flags "-u ${nixpkgs'.writeText ("nvimrc-" + name) (nix2nvimrc.lib.toRc nixpkgs' { inherit languages; imports = [ ./config.nix ];})}"
-          '';
-        packages = builtins.mapAttrs nvim {
-          admin = adminLanguages;
-          dev = adminLanguages ++ [
-            # treesitter
-            "beancount"
-            "c"
-            "cpp"
-            "make"
-            "python"
-          ];
-        };
-      in
-      {
-        inherit packages;
-        defaultPackage = packages.admin;
-      });
+  outputs = { self, ck3d-configs }:
+    let
+      inherit (ck3d-configs.inputs) nixpkgs nix2nvimrc;
+      inherit (nixpkgs) lib;
+      inherit (ck3d-configs.lib lib) readDirNix;
+
+      forAllSystems = lib.genAttrs lib.systems.flakeExposed;
+      nix2nvimrcConfigs = readDirNix ./configs
+        // {
+        inherit (ck3d-configs.nix2nvimrcConfigs)
+          Comment
+          toggleterm
+          leader
+          registers
+          vim-speeddating
+          lspconfig
+          lsp-status
+          cmp
+          nvim-treesitter
+          ;
+      };
+    in
+    {
+      inherit nix2nvimrcConfigs;
+
+      packages = forAllSystems
+        (system:
+          let
+            pkgs = nixpkgs.legacyPackages.${system};
+
+            nvims = builtins.mapAttrs
+              (name: languages: (lib.evalModules {
+                modules =
+                  (nix2nvimrc.lib.modules pkgs)
+                  ++ (builtins.attrValues ck3d-configs.nix2nvimrcModules)
+                  ++ (builtins.attrValues nix2nvimrcConfigs)
+                  ++ [{
+                    wrapper.name = name;
+                    inherit languages;
+                  }];
+              }).config.wrapper.drv)
+              rec {
+                nvim-admin = [ "nix" "yaml" "bash" "markdown" "json" "toml" ];
+                nvim-dev = nvim-admin ++ [
+                  "beancount"
+                  "c"
+                  "cpp"
+                  "make"
+                  "python"
+                ];
+              };
+          in
+          nvims // { default = nvims.nvim-admin; });
+    };
 }
