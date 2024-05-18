@@ -7,5 +7,6 @@
       signs.change.text = "~";
       signs.changedelete.text = "c~";
     };
+    env.PATH.values = [ "${pkgs.gitMinimal}/bin" ];
   };
 }

@@ -33,7 +33,10 @@
       packages = forAllSystems
         (system:
           let
-            pkgs = nixpkgs.legacyPackages.${system};
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays = builtins.attrValues ck3d-configs.overlays;
+            };
 
             nvims = builtins.mapAttrs
               (name: languages: (lib.evalModules {
@@ -44,6 +47,8 @@
                   ++ [{
                     wrapper.name = name;
                     inherit languages;
+                    enableFn = m: (m.languages == [ ])
+                    || (builtins.length (lib.intersectLists languages m.languages) > 0);
                   }];
               }).config.wrapper.drv)
               rec {
