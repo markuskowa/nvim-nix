@@ -47,18 +47,20 @@
                   ++ [{
                     wrapper.name = name;
                     inherit languages;
-                    enableFn = m: (m.languages == [ ])
-                    || (builtins.length (lib.intersectLists languages m.languages) > 0);
                   }];
               }).config.wrapper.drv)
               rec {
-                nvim-admin = [ "nix" "yaml" "bash" "markdown" "json" "toml" ];
+                nvim-admin = [ "nix" "yaml" "bash" "markdown" "json" "toml" "xml" ];
                 nvim-dev = nvim-admin ++ [
                   "beancount"
+                  "latex"
+                  "typst"
                   "c"
                   "cpp"
                   "make"
                   "python"
+                  "javascript"
+                  "html"
                 ];
               };
           in
