@@ -15,7 +15,6 @@
       nix2nvimrcConfigs = readDirNix ./configs
         // {
         inherit (ck3d-configs.nix2nvimrcConfigs)
-          Comment
           toggleterm
           leader
           registers
